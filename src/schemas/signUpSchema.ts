@@ -1,4 +1,4 @@
-
+import {z} from "zod"
 export const usernameValidation = z
 .string()
 .min(3, "Username must be at least 3 characters long")
