@@ -1,28 +1,27 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose'
+import dns from 'dns'
 
-// optional type number 
+// Ye pehle add karo — connect se pehle!
+dns.setServers(['1.1.1.1', '8.8.8.8'])
 type ConnectionObject = {
-    isConnected?: Number;
+    isConnected?: number
 }
 
-const connection: ConnectionObject = {};
+const connection : ConnectionObject = {}
 
-async function dbConnect() : Promise<void> {
-    if(connection.isConnected){
-        console.log("Already connected to database");
-    return;
-    }
+export async function dbConnect(): Promise<void>{
+   if(connection.isConnected){
+    console.log("Already database connected")
+    return
+   }
 
-    try {
-        const db = await mongoose.connect(process.env.MONGO_URI || "", {})
+   try {
+      const db = await mongoose.connect(process.env.mongo_URI || '', {}) 
+      connection.isConnected = db.connections[0].readyState
 
-        connection.isConnected = db.connections[0].readyState 
-        console.log("Database connected successfully");
-        
-    } catch (error) {
-        console.log("Database connection failed")
-        process.exit(1);
-    }
+      console.log("Database connected successfully✅");
+   } catch (error) {
+      console.log("Database connection failed:", error);
+      throw error;   
+   }
 }
-
-export default dbConnect;

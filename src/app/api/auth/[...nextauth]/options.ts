@@ -1,85 +1,83 @@
-import { NextAuthOptions } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
-import dbConnect from "@/lib/dbConnect";
-import UserModel from "@/model/user.model";
+import { NextAuthOptions} from "next-auth"
+import CredentialsProvider from "next-auth/providers/credentials"
+import { dbConnect } from "@/lib/dbConnect"
+import UserModel from "@/model/user.model"
+import bcrypt from "bcryptjs"
+import GoogleProvider from "next-auth/providers/google";
 
-// ye functionality provide karta hai ki kis tarah se user login karega
-export const authOption : NextAuthOptions = {
+export const authOptions: NextAuthOptions = {
     providers : [
-        CredentialsProvider({
-            // ye credentials ke through user login karega
-            id: "credentials",
-            name: "Credentials",
-            // ye main credentials hai
-            credentials : {
-                email: { label: "Email", type: "text" },
-                password: { label: "Password", type: "password" },
-            },
-            // ye login ke liye important authorization function hai
-            async authorize(credentials: any): Promise<any>{
-                // jab user login form submit karega to ye function call hoga
-                // sab se pehle db connect hoga
-                await dbConnect()
-                try { // find user by email or username in db
+       CredentialsProvider({
+           id: "creadential",
+           name: "Creadential",
+           credentials :{
+              email : {label : "Email", type : "text"},
+              password : {label : "Password", type : "password"}
+           },
+           async authorize(creadentials: any):Promise<any>{
+                await dbConnect();
+                try {
                   const user =  await UserModel.findOne({
-                    $or : [
-                        {email : credentials.identifier},
-                        {username : credentials.identifier},
-                    ]
-                   }) 
-                   if(!user){
-                    throw new Error("User not found with this email")
-                   }
+                        // user can find with email or username
+                        $or:[
+                            {email : creadentials.indetifier},
+                            {password :creadentials.indetifier}
+                        ]
+                    })
 
-                   if(!user.isVerified){
-                    throw new Error("Please verify your account before login")
-                   }
+                    if(!user){
+                        throw new Error("User is not found with this email")             
+                    }
 
-                   // comparing password 
-                   const isPasswordCorrect = await bcrypt.compare(credentials.password, user.password)
-                   if(isPasswordCorrect){
-                    return user;
-                   }else{
-                       throw new Error("Incorrect Password")
-                   }
-                } catch (err : any) {
+                    if(!user.isVerified){
+                        throw new Error("Please verify your account before login")
+                    }
+
+                     const isPasswordCorrect = await bcrypt.compare(creadentials.password, user.password)
+                     if(isPasswordCorrect){
+                        return user // ye user ka callback me use hota hai
+                     }else{
+                        throw new Error("Incorrect Password")
+                     }
+
+                } catch (err: any) {
                     throw new Error(err)
-                    
                 }
-            }
-        })
+           } 
+       }),
+       
+       GoogleProvider({
+        clientId: process.env.GOOGLE_CLIENT_ID!,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET!
+      })
     ],
-    //Callbacks ka kaam User data → Token me store karna → Session me bhejna
-    callbacks : {
-        async jwt({ token, user}) {
+
+    callbacks :{ // yaha user uper providers me jo user return karaya tha vo hai
+        async jwt({ token, user }) {
             if(user){
                 token._id = user._id?.toString();
                 token.isVerified = user.isVerified;
                 token.isAcceptingMessages = user.isAcceptingMessages;
                 token.username = user.username
             }
-
-            return token
-        },
-         async session({ session, token }) {
-            if (token) {
-                session.user._id = token._id;
+        return token
+    },
+       async session({ session, token }) {
+        if(token){
+                session.user._id = token._id?.toString();
                 session.user.isVerified = token.isVerified;
                 session.user.isAcceptingMessages = token.isAcceptingMessages;
-                session.user.username = token.username;
+                session.user.username = token.username
             }
-            return session;
-            },
+       return session
+    },       
     },
-    //Default NextAuth sign in page ki jagah custom page use hoga.
-    pages :{
-        signIn: '/sign-in'
+    pages : {
+        signIn : "/sign-In"
     },
-    // Browser me token store hoga (cookie me)
-    session : {
+    session :{
         strategy : "jwt"
     },
-    secret : process.env.NEXTAUTH_SECRET,  
-}
+    secret : process.env.NEXTAUTH_SECRET
 
+}
