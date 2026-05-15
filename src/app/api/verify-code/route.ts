@@ -6,6 +6,9 @@ export async function POST(request:Request) {
     try {
         const {username, code} = await request.json();
 
+        //decodeURIComponent() se 
+        // if username = "Faisal%20Shaikh" -> ye encodedUri hai -> yaha space = %20 
+        // isse decode karne kene ke liye ye method use hoti hai jiska output username = 'Faisal Shaikh'
         const decodedUsername = decodeURIComponent(username)
         const user = await UserModel.findOne({username : decodedUsername})
 

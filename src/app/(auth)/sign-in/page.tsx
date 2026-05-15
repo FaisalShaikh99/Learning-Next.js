@@ -1,13 +1,11 @@
-import React from 'react'
+'use client'
 
-function page(){
-   return (
-     <>
+const page = () => {
+  return (
     <div>
-        <h1>Page</h1>
+      <h1>Login</h1>
     </div>
-    </>
-   )
+  )
 }
 
-export default page;
+export default page
