@@ -28,15 +28,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={cn("font-sans", geist.variable)}>
-      <AuthProvider>
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <AuthProvider>  {/* ✅ body ke andar */}
           {children}
-           <Toaster />
-        </body>
-      </AuthProvider>
-
+          <Toaster richColors/>
+        </AuthProvider>
+      </body>
     </html>
   );
 }
