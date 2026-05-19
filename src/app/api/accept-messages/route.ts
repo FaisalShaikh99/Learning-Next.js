@@ -71,6 +71,9 @@ export async function GET(request : Request){
         }
         return Response.json({
             success : true,
+            // yaha status return ho raha hai ki user message accept ka raha hai ya nahi
+            /*agar isAcceptingMessage = true mean toggle on status return hoga otherwise 
+              toggle off return hoga*/
             isAcceptingMessage : user.isAcceptingMessage,
             message : "User is found"
          },{status : 200})

@@ -22,10 +22,12 @@ export async function POST(request: Request){
             },{status : 400})
         }
 
+        console.log(acceptingMessages)
+
         const newMessage = {content, createdAt : new Date()}
         user.messages.push(newMessage as Message)
         await user.save()
-
+        console.log("New messages : ", newMessage)
         return Response.json({
                 success : true,
                 message : "Message sent successfully"
